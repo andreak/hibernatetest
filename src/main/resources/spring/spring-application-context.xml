@@ -1,0 +1,67 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<beans xmlns="http://www.springframework.org/schema/beans"
+	   xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"
+	   xmlns:aop="http://www.springframework.org/schema/aop" xmlns:tx="http://www.springframework.org/schema/tx"
+	   xmlns:context="http://www.springframework.org/schema/context"
+	   xsi:schemaLocation="http://www.springframework.org/schema/beans http://www.springframework.org/schema/beans/spring-beans.xsd
+       http://www.springframework.org/schema/aop http://www.springframework.org/schema/aop/spring-aop.xsd
+       http://www.springframework.org/schema/tx http://www.springframework.org/schema/tx/spring-tx.xsd http://www.springframework.org/schema/context http://www.springframework.org/schema/context/spring-context-3.1.xsd">
+
+	<context:property-placeholder location="classpath*:spring/props/*.properties"/>
+	<context:component-scan base-package="no.officenet.test"/>
+
+	<tx:annotation-driven order="5" transaction-manager="transactionManager"/>
+
+	<bean id="myDataSource" class="com.mchange.v2.c3p0.ComboPooledDataSource"
+		  destroy-method="close">
+		<property name="driverClass" value="${infrastructure.datasource.driver}" />
+		<property name="jdbcUrl" value="${infrastructure.datasource.url}" />
+		<property name="user" value="${infrastructure.datasource.username}" />
+		<property name="password" value="${infrastructure.datasource.password}" />
+
+		<!-- these are C3P0 properties -->
+		<property name="minPoolSize" value="${infrastructure.datasource.minPoolSize}" />
+		<property name="maxPoolSize" value="${infrastructure.datasource.maxPoolSize}" />
+		<property name="maxIdleTime" value="${infrastructure.datasource.maxIdle}" />
+	</bean>
+
+	<bean id="hibernateVendorAdapter"
+		  class="org.springframework.orm.jpa.vendor.HibernateJpaVendorAdapter">
+		<property name="database" value="${infrastructure.database.vendor}"/>
+		<property name="showSql" value="${infrastructure.jpa.showSql}"/>
+		<property name="generateDdl" value="${infrastructure.jpa.generateDdl}"/>
+	</bean>
+
+	<bean id="entityManagerFactory"
+		  class="org.springframework.orm.jpa.LocalContainerEntityManagerFactoryBean">
+		<property name="dataSource" ref="myDataSource"/>
+		<property name="packagesToScan" value="no.officenet.test"/>
+		<property name="jpaVendorAdapter" ref="hibernateVendorAdapter"/>
+		<property name="jpaDialect" ref="jpaDialect"/>
+		<property name="jpaProperties">
+			<props>
+				<prop key="jadira.usertype.autoRegisterUserTypes">true</prop>
+				<prop key="jadira.usertype.databaseZone">jvm</prop>
+				<prop key="javax.persistence.sharedCache.mode">ENABLE_SELECTIVE</prop>
+				<prop key="hibernate.cache.region.factory_class">org.hibernate.cache.ehcache.SingletonEhCacheRegionFactory</prop>
+				<prop key="hibernate.cache.use_second_level_cache">true</prop>
+				<prop key="hibernate.cache.use_query_cache">true</prop>
+				<prop key="hibernate.enable_lazy_load_no_trans">true</prop>
+			</props>
+		</property>
+	</bean>
+
+	<bean id="jpaDialect" class="org.springframework.orm.jpa.vendor.HibernateJpaDialect"/>
+
+	<!-- It is OK for this to override definition from ONP -->
+	<bean id="transactionManager" class="org.springframework.orm.jpa.JpaTransactionManager">
+		<property name="entityManagerFactory" ref="entityManagerFactory"/>
+		<property name="jpaDialect" ref="jpaDialect"/>
+	</bean>
+
+	<!-- Postprocessor to transform hibernate exceptions to spring DataAccessExceptions  -->
+	<bean class="org.springframework.dao.annotation.PersistenceExceptionTranslationPostProcessor"/>
+
+	<!-- bean post-processor for JPA annotations -->
+	<bean class="org.springframework.orm.jpa.support.PersistenceAnnotationBeanPostProcessor"/>
+</beans>
