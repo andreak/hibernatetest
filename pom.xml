@@ -12,7 +12,8 @@
 		<version.slf4j>1.6.1</version.slf4j>
 		<version.log4j>1.2.17</version.log4j>
 		<project.build.sourceEncoding>UTF-8</project.build.sourceEncoding>
-		<version.org.hibernate>4.1.6.Final</version.org.hibernate>
+		<version.org.hibernate>4.1.7.Final</version.org.hibernate>
+		<!--<version.org.hibernate>4.1.6.Final</version.org.hibernate>-->
 		<version.spring>3.1.2.RELEASE</version.spring>
 		<version.spring-security>3.1.2.RELEASE</version.spring-security>
 		<version.testng>6.7</version.testng>
@@ -25,6 +26,11 @@
 			<dependency>
 				<groupId>org.hibernate</groupId>
 				<artifactId>hibernate-entitymanager</artifactId>
+				<version>${version.org.hibernate}</version>
+			</dependency>
+			<dependency>
+				<groupId>org.hibernate</groupId>
+				<artifactId>hibernate-testing</artifactId>
 				<version>${version.org.hibernate}</version>
 			</dependency>
 			<dependency>
@@ -175,6 +181,11 @@
 		<dependency>
 			<groupId>org.apache.derby</groupId>
 			<artifactId>derby</artifactId>
+			<scope>test</scope>
+		</dependency>
+		<dependency>
+			<groupId>org.hibernate</groupId>
+			<artifactId>hibernate-testing</artifactId>
 			<scope>test</scope>
 		</dependency>
 

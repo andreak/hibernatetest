@@ -2,6 +2,7 @@ package no.officenet.test.hibernatetest.model;
 
 import javax.persistence.CascadeType;
 import javax.persistence.Column;
+import javax.persistence.DiscriminatorValue;
 import javax.persistence.Entity;
 import javax.persistence.FetchType;
 import javax.persistence.OneToMany;
@@ -13,6 +14,7 @@ import java.util.List;
 @Entity
 @Table(name = "company")
 @PrimaryKeyJoinColumn(name = "id")
+@DiscriminatorValue("COMPANY")
 public class Company extends AbstractEntity {
 
 	public Company() {

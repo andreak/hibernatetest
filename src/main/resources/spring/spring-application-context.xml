@@ -40,13 +40,12 @@
 		<property name="jpaDialect" ref="jpaDialect"/>
 		<property name="jpaProperties">
 			<props>
-				<prop key="jadira.usertype.autoRegisterUserTypes">true</prop>
-				<prop key="jadira.usertype.databaseZone">jvm</prop>
 				<prop key="javax.persistence.sharedCache.mode">ENABLE_SELECTIVE</prop>
 				<prop key="hibernate.cache.region.factory_class">org.hibernate.cache.ehcache.SingletonEhCacheRegionFactory</prop>
 				<prop key="hibernate.cache.use_second_level_cache">true</prop>
 				<prop key="hibernate.cache.use_query_cache">true</prop>
-				<prop key="hibernate.enable_lazy_load_no_trans">true</prop>
+				<prop key="hibernate.enable_lazy_load_no_trans">${infrastructure.jpa.hibernate.enable_lazy_load_no_trans}</prop>
+				<prop key="hibernate.discriminator.force_in_select">true</prop>
 			</props>
 		</property>
 	</bean>

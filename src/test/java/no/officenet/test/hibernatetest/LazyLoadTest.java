@@ -1,24 +1,41 @@
 package no.officenet.test.hibernatetest;
 
 import com.mchange.v2.c3p0.ComboPooledDataSource;
+import no.officenet.test.hibernatetest.model.AbstractEntity;
 import no.officenet.test.hibernatetest.model.Car;
 import no.officenet.test.hibernatetest.model.Company;
 import no.officenet.test.hibernatetest.model.Person;
 import no.officenet.test.hibernatetest.service.CarRepository;
 import no.officenet.test.hibernatetest.service.CompanyRepository;
+import no.officenet.test.hibernatetest.service.EntityRepository;
 import no.officenet.test.hibernatetest.service.PersonRepository;
+import org.hibernate.Hibernate;
+import org.hibernate.LazyInitializationException;
+import org.hibernate.Session;
+import org.hibernate.SessionFactory;
+import org.hibernate.ejb.EntityManagerFactoryImpl;
+import org.hibernate.internal.SessionFactoryImpl;
+import org.springframework.aop.framework.Advised;
+import org.springframework.aop.support.AopUtils;
+import org.springframework.orm.jpa.LocalContainerEntityManagerFactoryBean;
 import org.springframework.test.context.ContextConfiguration;
 import org.springframework.test.context.testng.AbstractTestNGSpringContextTests;
 import org.springframework.transaction.PlatformTransactionManager;
 import org.springframework.transaction.TransactionDefinition;
 import org.springframework.transaction.TransactionStatus;
 import org.springframework.transaction.support.DefaultTransactionDefinition;
+import org.springframework.transaction.support.TransactionCallback;
 import org.springframework.transaction.support.TransactionCallbackWithoutResult;
 import org.springframework.transaction.support.TransactionTemplate;
+import org.testng.Assert;
+import org.testng.annotations.AfterMethod;
 import org.testng.annotations.BeforeClass;
+import org.testng.annotations.BeforeMethod;
 import org.testng.annotations.Test;
 
 import javax.annotation.Resource;
+import javax.persistence.EntityManager;
+import javax.persistence.PersistenceContext;
 import javax.sql.DataSource;
 import java.util.Arrays;
 
@@ -35,7 +52,11 @@ public class LazyLoadTest extends AbstractTestNGSpringContextTests {
 	@Resource
 	CompanyRepository companyRepository;
 	@Resource
+	EntityRepository entityRepository;
+	@Resource
 	DataSource dataSource;
+	@PersistenceContext
+	protected EntityManager entityManager;
 
 	@Resource
 	protected PlatformTransactionManager transactionManager;
@@ -43,22 +64,43 @@ public class LazyLoadTest extends AbstractTestNGSpringContextTests {
 	protected TransactionTemplate transactionTemplate;
 
 	private static final String companyName = "OfficeNet AS";
+	private static final String personUserName = "andreak";
 
 	@BeforeClass
 	private void beforeClass() throws Exception {
 		transactionTemplate = new TransactionTemplate(transactionManager, new DefaultTransactionDefinition(TransactionDefinition.PROPAGATION_REQUIRED));
 	}
 
-	public void testLazyLoadLeaksConnections() throws Exception {
-		System.out.println("First deleting old data");
-		deleteTestData();
-		System.out.println("Generating test-data");
+	@BeforeMethod
+	private void beforeEachMethod() throws Exception {
 		generateTestData();
+	}
+
+	@AfterMethod
+	private void afterEachMethod() throws Exception {
+		deleteTestData();
+	}
+
+	@SuppressWarnings({"unchecked"})
+	protected <T> T getTargetObject(Object proxy, Class<T> targetClass) throws Exception {
+		if (AopUtils.isJdkDynamicProxy(proxy)) {
+			return (T) ((Advised)proxy).getTargetSource().getTarget();
+		} else {
+			return (T) proxy; // expected to be cglib proxy then, which is simply a specialized class
+		}
+	}
+
+	public void testLazyLoadLeaksConnections() throws Exception {
 		ComboPooledDataSource c3poDataSource = (ComboPooledDataSource) dataSource;
 		System.out.println("Looping to trigger connection-leak");
 		for (int i = 0; i < 10; i++) {
 			System.out.println("Iteration " + (i + 1));
-			Company officeNet = companyRepository.findByCompanyName(companyName);
+			Company officeNet = transactionTemplate.execute(new TransactionCallback<Company>() {
+				@Override
+				public Company doInTransaction(TransactionStatus status) {
+					return companyRepository.findByCompanyName(companyName);
+				}
+			});
 			for (Person person : officeNet.getEmployees()) {
 				for (Car car : person.getCars()) {
 					System.out.println("Used connections in pool: " + c3poDataSource.getNumBusyConnections());
@@ -67,6 +109,31 @@ public class LazyLoadTest extends AbstractTestNGSpringContextTests {
 			}
 		}
 		// never gets here cause the loop triggers the connection-leak
+	}
+
+	public void retreiveEntity() throws Exception {
+		AbstractEntity abstractEntity = entityRepository.retrieve(1L);
+		System.out.println(abstractEntity);
+	}
+
+	public void testLazyLoadManyToOne() throws Exception {
+		final Person person = personRepository.findByUserName(personUserName);
+		Company company = person.getCompany();
+		System.out.println("Got " + person.getFirstName() + "'s company: " + company.getName());
+	}
+
+	public void testLazyLoadManyToOneWithNaturalKeyFails() throws Exception {
+		Long carId = transactionTemplate.execute(new TransactionCallback<Long>() {
+			@Override
+			public Long doInTransaction(TransactionStatus status) {
+				Person p = personRepository.findByUserName(personUserName);
+				Car car = p.getCars().get(0);
+				return car.getId();
+			}
+		});
+		System.out.println("Retrieving car with id = " + carId);
+		Car car = carRepository.retrieve(carId);
+		Assert.assertFalse(Hibernate.isInitialized(car.getOwner()), "car.getOwner is lazy and shouldn't be initialized");
 	}
 
 	private void deleteTestData() {
@@ -84,7 +151,7 @@ public class LazyLoadTest extends AbstractTestNGSpringContextTests {
 	private void generateTestData() {
 		final Company officeNet = new Company(companyName)
 			.addEmployee(
-				new Person("andreak", "Andreas", "Krogh", Arrays.asList(
+				new Person(personUserName, "Andreas", "Krogh", Arrays.asList(
 					new Car("Volvo")
 				))
 			).addEmployee(

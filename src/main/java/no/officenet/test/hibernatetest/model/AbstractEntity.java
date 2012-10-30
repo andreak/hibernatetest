@@ -1,6 +1,8 @@
 package no.officenet.test.hibernatetest.model;
 
 import javax.persistence.Column;
+import javax.persistence.DiscriminatorColumn;
+import javax.persistence.DiscriminatorType;
 import javax.persistence.Entity;
 import javax.persistence.GeneratedValue;
 import javax.persistence.GenerationType;
@@ -15,6 +17,7 @@ import java.io.Serializable;
 @Entity
 @Table(name = "abstract_entity")
 @Inheritance(strategy = InheritanceType.JOINED)
+@DiscriminatorColumn(name = "dtype", discriminatorType = DiscriminatorType.STRING)
 @SequenceGenerator(name = "SEQ_STORE", sequenceName = "abstract_entity_id_seq", allocationSize = 1)
 public abstract class AbstractEntity implements Serializable {
 
