@@ -48,6 +48,10 @@ public class Person extends AbstractEntity{
 	@JoinColumn(name = "company_id")
 	private Company company = null;
 
+	@OneToMany(fetch = FetchType.LAZY, cascade = CascadeType.ALL, orphanRemoval = true)
+	@JoinColumn(name = "recipient_id", nullable = false)
+	List<EmailAddress> emailAddresses = new ArrayList<>();
+
 	public String getUserName() {
 		return userName;
 	}
