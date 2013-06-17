@@ -174,6 +174,7 @@ public class LazyLoadTest extends AbstractTestNGSpringContextTests {
 			@Override
 			protected void doInTransactionWithoutResult(TransactionStatus status) {
 				Company savedON = companyRepository.save(officeNet);
+				superRole.setCompany(savedON);
 				savedON.setRole(personRepository.save(superRole));
 				companyRepository.save(savedON);
 			}
