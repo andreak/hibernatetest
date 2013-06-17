@@ -9,6 +9,7 @@
 
 	<context:property-placeholder location="classpath*:spring/props/*.properties"/>
 	<context:component-scan base-package="no.officenet.test"/>
+	<context:load-time-weaver/>
 
 	<tx:annotation-driven order="5" transaction-manager="transactionManager"/>
 
@@ -26,7 +27,7 @@
 	</bean>
 
 	<bean id="jpaVendorAdapter"
-		  class="org.springframework.orm.jpa.vendor.HibernateJpaVendorAdapter">
+		  class="org.springframework.orm.jpa.vendor.EclipseLinkJpaVendorAdapter">
 		<property name="database" value="${infrastructure.database.vendor}"/>
 		<property name="showSql" value="${infrastructure.jpa.showSql}"/>
 		<property name="generateDdl" value="${infrastructure.jpa.generateDdl}"/>
@@ -42,12 +43,11 @@
 			<props>
 				<prop key="eclipselink.cache.shared.default">false</prop>
 				<prop key="javax.persistence.sharedCache.mode">ENABLE_SELECTIVE</prop>
-				<prop key="hibernate.enable_lazy_load_no_trans">${infrastructure.jpa.hibernate.enable_lazy_load_no_trans}</prop>
 			</props>
 		</property>
 	</bean>
 
-	<bean id="jpaDialect" class="org.springframework.orm.jpa.vendor.HibernateJpaDialect"/>
+	<bean id="jpaDialect" class="org.springframework.orm.jpa.vendor.EclipseLinkJpaDialect"/>
 
 	<!-- It is OK for this to override definition from ONP -->
 	<bean id="transactionManager" class="org.springframework.orm.jpa.JpaTransactionManager">

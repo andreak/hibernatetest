@@ -32,11 +32,9 @@ public class Company extends AbstractEntity {
 	private List<Person> employees = new ArrayList<>();
 
 	// Hibernate barfs on this mapping: https://hibernate.atlassian.net/browse/HHH-7814
-/*
 	@OneToMany(fetch = FetchType.LAZY, cascade = CascadeType.ALL, orphanRemoval = true)
 	@JoinColumn(name = "recipient_id", nullable = false)
 	List<EmailAddress> emailAddresses = new ArrayList<>();
-*/
 
 	public Company addEmployee(Person person) {
 		person.setCompany(this);
