@@ -9,6 +9,7 @@
 
 	<context:property-placeholder location="classpath*:spring/props/*.properties"/>
 	<context:component-scan base-package="no.officenet.test"/>
+	<context:load-time-weaver/>
 
 	<tx:annotation-driven order="5" transaction-manager="transactionManager"/>
 
@@ -25,8 +26,8 @@
 		<property name="maxIdleTime" value="${infrastructure.datasource.maxIdle}" />
 	</bean>
 
-	<bean id="hibernateVendorAdapter"
-		  class="org.springframework.orm.jpa.vendor.HibernateJpaVendorAdapter">
+	<bean id="jpaVendorAdapter"
+		  class="org.springframework.orm.jpa.vendor.EclipseLinkJpaVendorAdapter">
 		<property name="database" value="${infrastructure.database.vendor}"/>
 		<property name="showSql" value="${infrastructure.jpa.showSql}"/>
 		<property name="generateDdl" value="${infrastructure.jpa.generateDdl}"/>
@@ -36,21 +37,17 @@
 		  class="org.springframework.orm.jpa.LocalContainerEntityManagerFactoryBean">
 		<property name="dataSource" ref="myDataSource"/>
 		<property name="packagesToScan" value="no.officenet.test"/>
-		<property name="jpaVendorAdapter" ref="hibernateVendorAdapter"/>
+		<property name="jpaVendorAdapter" ref="jpaVendorAdapter"/>
 		<property name="jpaDialect" ref="jpaDialect"/>
 		<property name="jpaProperties">
 			<props>
+				<prop key="eclipselink.cache.shared.default">false</prop>
 				<prop key="javax.persistence.sharedCache.mode">ENABLE_SELECTIVE</prop>
-				<prop key="hibernate.cache.region.factory_class">org.hibernate.cache.ehcache.SingletonEhCacheRegionFactory</prop>
-				<prop key="hibernate.cache.use_second_level_cache">true</prop>
-				<prop key="hibernate.cache.use_query_cache">true</prop>
-				<prop key="hibernate.enable_lazy_load_no_trans">${infrastructure.jpa.hibernate.enable_lazy_load_no_trans}</prop>
-				<prop key="hibernate.discriminator.force_in_select">true</prop>
 			</props>
 		</property>
 	</bean>
 
-	<bean id="jpaDialect" class="org.springframework.orm.jpa.vendor.HibernateJpaDialect"/>
+	<bean id="jpaDialect" class="org.springframework.orm.jpa.vendor.EclipseLinkJpaDialect"/>
 
 	<!-- It is OK for this to override definition from ONP -->
 	<bean id="transactionManager" class="org.springframework.orm.jpa.JpaTransactionManager">
@@ -58,7 +55,7 @@
 		<property name="jpaDialect" ref="jpaDialect"/>
 	</bean>
 
-	<!-- Postprocessor to transform hibernate exceptions to spring DataAccessExceptions  -->
+	<!-- Postprocessor to transform jpa-vendor exceptions to spring DataAccessExceptions  -->
 	<bean class="org.springframework.dao.annotation.PersistenceExceptionTranslationPostProcessor"/>
 
 	<!-- bean post-processor for JPA annotations -->

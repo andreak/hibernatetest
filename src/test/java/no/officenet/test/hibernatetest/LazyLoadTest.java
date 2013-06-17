@@ -9,15 +9,8 @@ import no.officenet.test.hibernatetest.service.CarRepository;
 import no.officenet.test.hibernatetest.service.CompanyRepository;
 import no.officenet.test.hibernatetest.service.EntityRepository;
 import no.officenet.test.hibernatetest.service.PersonRepository;
-import org.hibernate.Hibernate;
-import org.hibernate.LazyInitializationException;
-import org.hibernate.Session;
-import org.hibernate.SessionFactory;
-import org.hibernate.ejb.EntityManagerFactoryImpl;
-import org.hibernate.internal.SessionFactoryImpl;
 import org.springframework.aop.framework.Advised;
 import org.springframework.aop.support.AopUtils;
-import org.springframework.orm.jpa.LocalContainerEntityManagerFactoryBean;
 import org.springframework.test.context.ContextConfiguration;
 import org.springframework.test.context.testng.AbstractTestNGSpringContextTests;
 import org.springframework.transaction.PlatformTransactionManager;
@@ -35,9 +28,12 @@ import org.testng.annotations.Test;
 
 import javax.annotation.Resource;
 import javax.persistence.EntityManager;
+import javax.persistence.EntityManagerFactory;
 import javax.persistence.PersistenceContext;
+import javax.persistence.PersistenceUnitUtil;
 import javax.sql.DataSource;
 import java.util.Arrays;
+import java.util.Collections;
 
 @Test
 @ContextConfiguration(locations = {
@@ -60,6 +56,10 @@ public class LazyLoadTest extends AbstractTestNGSpringContextTests {
 
 	@Resource
 	protected PlatformTransactionManager transactionManager;
+	@Resource
+	protected EntityManagerFactory entityManagerFactory;
+
+	protected PersistenceUnitUtil persistenceUnitUtil;
 
 	protected TransactionTemplate transactionTemplate;
 
@@ -69,6 +69,7 @@ public class LazyLoadTest extends AbstractTestNGSpringContextTests {
 	@BeforeClass
 	private void beforeClass() throws Exception {
 		transactionTemplate = new TransactionTemplate(transactionManager, new DefaultTransactionDefinition(TransactionDefinition.PROPAGATION_REQUIRED));
+		persistenceUnitUtil = entityManagerFactory.getPersistenceUnitUtil();
 	}
 
 	@BeforeMethod
@@ -133,7 +134,16 @@ public class LazyLoadTest extends AbstractTestNGSpringContextTests {
 		});
 		System.out.println("Retrieving car with id = " + carId);
 		Car car = carRepository.retrieve(carId);
-		Assert.assertFalse(Hibernate.isInitialized(car.getOwner()), "car.getOwner is lazy and shouldn't be initialized");
+		Assert.assertTrue(persistenceUnitUtil.isLoaded(car.getOwner()), "car.getOwner is lazy but should be initialized because it's not mapped by PK");
+	}
+
+	public void testPolymorphicAssoc() throws Exception {
+		Company on = companyRepository.findByCompanyName(companyName);
+		System.out.println("Got company");
+		System.out.println(on.getRole());
+		Assert.assertTrue(on.getRole() instanceof Person);
+		Person role = (Person) on.getRole();
+		System.out.println("role: " + role.getFirstName() + " " + role.getLastName());
 	}
 
 	private void deleteTestData() {
@@ -159,10 +169,13 @@ public class LazyLoadTest extends AbstractTestNGSpringContextTests {
 					new Car("Ferrari")
 				))
 			);
+		final Person superRole = new Person("superRole", "Super", "Role", Collections.<Car>emptyList());
 		transactionTemplate.execute(new TransactionCallbackWithoutResult() {
 			@Override
 			protected void doInTransactionWithoutResult(TransactionStatus status) {
-				companyRepository.save(officeNet);
+				Company savedON = companyRepository.save(officeNet);
+				savedON.setRole(personRepository.save(superRole));
+				companyRepository.save(savedON);
 			}
 		});
 	}

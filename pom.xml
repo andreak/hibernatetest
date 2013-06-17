@@ -14,7 +14,7 @@
 		<project.build.sourceEncoding>UTF-8</project.build.sourceEncoding>
 		<version.org.hibernate>4.1.8.Final</version.org.hibernate>
 		<version.spring>3.1.2.RELEASE</version.spring>
-		<version.spring-security>3.1.2.RELEASE</version.spring-security>
+		<version.spring>3.2.3.RELEASE</version.spring>
 		<version.testng>6.7</version.testng>
 		<version.c3p0>0.9.1.2</version.c3p0>
 		<version.derby>10.9.1.0</version.derby>
@@ -23,19 +23,9 @@
 	<dependencyManagement>
 		<dependencies>
 			<dependency>
-				<groupId>org.hibernate</groupId>
-				<artifactId>hibernate-entitymanager</artifactId>
-				<version>${version.org.hibernate}</version>
-			</dependency>
-			<dependency>
-				<groupId>org.hibernate</groupId>
-				<artifactId>hibernate-testing</artifactId>
-				<version>${version.org.hibernate}</version>
-			</dependency>
-			<dependency>
-				<groupId>org.hibernate</groupId>
-				<artifactId>hibernate-ehcache</artifactId>
-				<version>${version.org.hibernate}</version>
+				<groupId>org.eclipse.persistence</groupId>
+				<artifactId>org.eclipse.persistence.jpa</artifactId>
+				<version>${version.eclipselink}</version>
 			</dependency>
 			<dependency>
 				<groupId>org.springframework</groupId>
@@ -88,21 +78,6 @@
 				<version>${version.spring}</version>
 			</dependency>
 			<dependency>
-				<groupId>org.springframework.security</groupId>
-				<artifactId>spring-security-core</artifactId>
-				<version>${version.spring-security}</version>
-			</dependency>
-			<dependency>
-				<groupId>org.springframework.security</groupId>
-				<artifactId>spring-security-web</artifactId>
-				<version>${version.spring-security}</version>
-			</dependency>
-			<dependency>
-				<groupId>org.springframework.security</groupId>
-				<artifactId>spring-security-config</artifactId>
-				<version>${version.spring-security}</version>
-			</dependency>
-			<dependency>
 				<groupId>c3p0</groupId>
 				<artifactId>c3p0</artifactId>
 				<version>${version.c3p0}</version>
@@ -136,14 +111,10 @@
 			<artifactId>slf4j-log4j12</artifactId>
 		</dependency>
 		<dependency>
-			<groupId>org.hibernate</groupId>
-			<artifactId>hibernate-entitymanager</artifactId>
+			<groupId>org.eclipse.persistence</groupId>
+			<artifactId>org.eclipse.persistence.jpa</artifactId>
 		</dependency>
 
-		<dependency>
-			<groupId>org.hibernate</groupId>
-			<artifactId>hibernate-ehcache</artifactId>
-		</dependency>
 		<dependency>
 			<groupId>org.springframework</groupId>
 			<artifactId>spring-beans</artifactId>
@@ -180,11 +151,6 @@
 		<dependency>
 			<groupId>org.apache.derby</groupId>
 			<artifactId>derby</artifactId>
-			<scope>test</scope>
-		</dependency>
-		<dependency>
-			<groupId>org.hibernate</groupId>
-			<artifactId>hibernate-testing</artifactId>
 			<scope>test</scope>
 		</dependency>
 
