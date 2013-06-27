@@ -15,12 +15,19 @@
 		<version.eclipselink>2.5.0</version.eclipselink>
 		<version.spring>3.2.3.RELEASE</version.spring>
 		<version.testng>6.7</version.testng>
-		<version.c3p0>0.9.1.2</version.c3p0>
+		<version.tomcat-dbcp>7.0.21</version.tomcat-dbcp>
 		<version.derby>10.9.1.0</version.derby>
+		<version.postgresql>9.2-1002-jdbc4</version.postgresql>
+		<version.commons-io>2.4</version.commons-io>
 	</properties>
 
 	<dependencyManagement>
 		<dependencies>
+			<dependency>
+				<groupId>commons-io</groupId>
+				<artifactId>commons-io</artifactId>
+				<version>${version.commons-io}</version>
+			</dependency>
 			<dependency>
 				<groupId>org.eclipse.persistence</groupId>
 				<artifactId>org.eclipse.persistence.jpa</artifactId>
@@ -77,19 +84,33 @@
 				<version>${version.spring}</version>
 			</dependency>
 			<dependency>
-				<groupId>c3p0</groupId>
-				<artifactId>c3p0</artifactId>
-				<version>${version.c3p0}</version>
+				<groupId>org.apache.tomcat</groupId>
+				<artifactId>tomcat-dbcp</artifactId>
+				<version>${version.tomcat-dbcp}</version>
 			</dependency>
 			<dependency>
 				<groupId>org.testng</groupId>
 				<artifactId>testng</artifactId>
 				<version>${version.testng}</version>
 			</dependency>
+<!--
 			<dependency>
 				<groupId>org.apache.derby</groupId>
 				<artifactId>derby</artifactId>
 				<version>${version.derby}</version>
+			</dependency>
+-->
+<!--
+			<dependency>
+				<groupId>org.postgresql</groupId>
+				<artifactId>postgresql</artifactId>
+				<version>${version.postgresql}</version>
+			</dependency>
+-->
+			<dependency>
+				<groupId>com.impossibl</groupId>
+				<artifactId>pgjdbc-ng</artifactId>
+				<version>0.0.1-SNAPSHOT</version>
 			</dependency>
 			<dependency>
 				<groupId>org.slf4j</groupId>
@@ -113,6 +134,10 @@
 			<groupId>org.eclipse.persistence</groupId>
 			<artifactId>org.eclipse.persistence.jpa</artifactId>
 		</dependency>
+		<dependency>
+			<groupId>commons-io</groupId>
+			<artifactId>commons-io</artifactId>
+		</dependency>
 
 		<dependency>
 			<groupId>org.springframework</groupId>
@@ -131,8 +156,8 @@
 			<artifactId>spring-orm</artifactId>
 		</dependency>
 		<dependency>
-			<groupId>c3p0</groupId>
-			<artifactId>c3p0</artifactId>
+			<groupId>org.apache.tomcat</groupId>
+			<artifactId>tomcat-dbcp</artifactId>
 		</dependency>
 
 
@@ -147,9 +172,16 @@
 			<artifactId>spring-test</artifactId>
 			<scope>test</scope>
 		</dependency>
+<!--
 		<dependency>
 			<groupId>org.apache.derby</groupId>
 			<artifactId>derby</artifactId>
+			<scope>test</scope>
+		</dependency>
+-->
+		<dependency>
+			<groupId>com.impossibl</groupId>
+			<artifactId>pgjdbc-ng</artifactId>
 			<scope>test</scope>
 		</dependency>
 

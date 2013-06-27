@@ -13,17 +13,16 @@
 
 	<tx:annotation-driven order="5" transaction-manager="transactionManager"/>
 
-	<bean id="myDataSource" class="com.mchange.v2.c3p0.ComboPooledDataSource"
-		  destroy-method="close">
-		<property name="driverClass" value="${infrastructure.datasource.driver}" />
-		<property name="jdbcUrl" value="${infrastructure.datasource.url}" />
-		<property name="user" value="${infrastructure.datasource.username}" />
+	<bean id="myDataSource" class="org.apache.tomcat.dbcp.dbcp.BasicDataSource">
+		<property name="driverClassName" value="${infrastructure.datasource.driver}" />
+		<property name="url" value="${infrastructure.datasource.url}" />
+		<property name="username" value="${infrastructure.datasource.username}" />
 		<property name="password" value="${infrastructure.datasource.password}" />
 
 		<!-- these are C3P0 properties -->
-		<property name="minPoolSize" value="${infrastructure.datasource.minPoolSize}" />
-		<property name="maxPoolSize" value="${infrastructure.datasource.maxPoolSize}" />
-		<property name="maxIdleTime" value="${infrastructure.datasource.maxIdle}" />
+		<property name="minIdle" value="${infrastructure.datasource.minPoolSize}" />
+		<property name="maxActive" value="${infrastructure.datasource.maxPoolSize}" />
+		<property name="maxWait" value="${infrastructure.datasource.maxIdle}" />
 	</bean>
 
 	<bean id="jpaVendorAdapter"
@@ -42,6 +41,7 @@
 		<property name="jpaProperties">
 			<props>
 				<prop key="eclipselink.cache.shared.default">false</prop>
+				<prop key="eclipselink.target-database">no.officenet.test.hibernatetest.infrastructure.jpa.PostgreSQLPlatform</prop>
 				<prop key="javax.persistence.sharedCache.mode">ENABLE_SELECTIVE</prop>
 			</props>
 		</property>

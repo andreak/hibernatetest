@@ -1,16 +1,21 @@
 package no.officenet.test.hibernatetest;
 
-import com.mchange.v2.c3p0.ComboPooledDataSource;
 import no.officenet.test.hibernatetest.model.AbstractEntity;
 import no.officenet.test.hibernatetest.model.Car;
 import no.officenet.test.hibernatetest.model.Company;
+import no.officenet.test.hibernatetest.model.FileRawData;
 import no.officenet.test.hibernatetest.model.Person;
 import no.officenet.test.hibernatetest.service.CarRepository;
 import no.officenet.test.hibernatetest.service.CompanyRepository;
 import no.officenet.test.hibernatetest.service.EntityRepository;
 import no.officenet.test.hibernatetest.service.PersonRepository;
+import org.apache.commons.io.FileUtils;
+import org.apache.commons.io.IOUtils;
 import org.springframework.aop.framework.Advised;
 import org.springframework.aop.support.AopUtils;
+import org.springframework.dao.DataAccessException;
+import org.springframework.jdbc.core.ConnectionCallback;
+import org.springframework.jdbc.core.JdbcTemplate;
 import org.springframework.test.context.ContextConfiguration;
 import org.springframework.test.context.testng.AbstractTestNGSpringContextTests;
 import org.springframework.transaction.PlatformTransactionManager;
@@ -32,6 +37,12 @@ import javax.persistence.EntityManagerFactory;
 import javax.persistence.PersistenceContext;
 import javax.persistence.PersistenceUnitUtil;
 import javax.sql.DataSource;
+import java.io.File;
+import java.io.IOException;
+import java.io.OutputStream;
+import java.sql.Blob;
+import java.sql.Connection;
+import java.sql.SQLException;
 import java.util.Arrays;
 import java.util.Collections;
 
@@ -92,7 +103,7 @@ public class LazyLoadTest extends AbstractTestNGSpringContextTests {
 	}
 
 	public void testLazyLoadLeaksConnections() throws Exception {
-		ComboPooledDataSource c3poDataSource = (ComboPooledDataSource) dataSource;
+/*		ComboPooledDataSource c3poDataSource = (ComboPooledDataSource) dataSource;
 		System.out.println("Looping to trigger connection-leak");
 		for (int i = 0; i < 10; i++) {
 			System.out.println("Iteration " + (i + 1));
@@ -108,7 +119,7 @@ public class LazyLoadTest extends AbstractTestNGSpringContextTests {
 					System.out.println("Employee " + person.getFirstName() + " has car: " + car.getModel());
 				}
 			}
-		}
+		}*/
 		// never gets here cause the loop triggers the connection-leak
 	}
 
@@ -146,6 +157,20 @@ public class LazyLoadTest extends AbstractTestNGSpringContextTests {
 		System.out.println("role: " + role.getFirstName() + " " + role.getLastName());
 	}
 
+	public void testLazyBlob() throws Exception {
+		transactionTemplate.execute(new TransactionCallbackWithoutResult() {
+			@Override
+			protected void doInTransactionWithoutResult(TransactionStatus status) {
+				try {
+					final Car car = carRepository.retrieve(58l);
+					FileUtils.copyInputStreamToFile(car.getData().getData().getBinaryStream(), new File("/home/andreak/hei-" + System.currentTimeMillis() + ".dmp"));
+				} catch (Exception e) {
+					throw new RuntimeException(e.getMessage(), e);
+				}
+			}
+		});
+	}
+
 	private void deleteTestData() {
 		transactionTemplate.execute(new TransactionCallbackWithoutResult() {
 			@Override
@@ -177,6 +202,27 @@ public class LazyLoadTest extends AbstractTestNGSpringContextTests {
 				superRole.setCompany(savedON);
 				savedON.setRole(personRepository.save(superRole));
 				companyRepository.save(savedON);
+/*
+				Blob b = new JdbcTemplate(dataSource).execute(new ConnectionCallback<Blob>() {
+					@Override
+					public Blob doInConnection(Connection con) throws SQLException, DataAccessException {
+						Blob b = con.createBlob();
+						OutputStream outputStream = b.setBinaryStream(1);
+						try {
+//							FileUtils.copyFile(new File("/home/andreak/a.txt"), outputStream);
+							FileUtils.copyFile(new File("/home/andreak/Downloads/quantal-desktop-amd64.iso"), outputStream);
+							outputStream.flush();
+							outputStream.close();
+						} catch (IOException e) {
+							e.printStackTrace();  //To change body of catch statement use File | Settings | File Templates.
+						}
+						return b;
+					}
+				});
+				Car car = new Car("Vamonda!");
+				car.setData(new FileRawData(b));
+				carRepository.save(car);
+*/
 			}
 		});
 	}
