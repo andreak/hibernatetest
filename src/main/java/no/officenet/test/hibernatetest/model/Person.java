@@ -26,9 +26,7 @@ public class Person extends AbstractEntity{
 		this.userName = userName;
 		this.firstName = firstName;
 		this.lastName = lastName;
-		this.cars = cars;
 		for (Car car : cars) {
-			car.setOwner(this);
 		}
 	}
 
@@ -40,9 +38,6 @@ public class Person extends AbstractEntity{
 
 	@Column(name = "lastname")
 	private String lastName = null;
-
-	@OneToMany(fetch = FetchType.LAZY, mappedBy = "owner", cascade = CascadeType.ALL)
-	List<Car> cars = new ArrayList<>();
 
 	@ManyToOne(fetch = FetchType.LAZY, optional = false)
 	@JoinColumn(name = "company_id")
@@ -74,14 +69,6 @@ public class Person extends AbstractEntity{
 
 	public void setLastName(String lastName) {
 		this.lastName = lastName;
-	}
-
-	public List<Car> getCars() {
-		return cars;
-	}
-
-	public void setCars(List<Car> cars) {
-		this.cars = cars;
 	}
 
 	public Company getCompany() {

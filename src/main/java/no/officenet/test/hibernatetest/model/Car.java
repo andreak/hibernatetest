@@ -24,10 +24,6 @@ public class Car extends AbstractEntity {
 		this.model = model;
 	}
 
-	@ManyToOne(fetch = FetchType.LAZY, optional = false)
-	@JoinColumn(name = "owner_name", referencedColumnName = "username") // Don't use PK to show non-lazy behavior
-	private Person owner = null;
-
 	@Column(name = "model")
 	private String model = null;
 
@@ -41,14 +37,6 @@ public class Car extends AbstractEntity {
 
 	public void setData(FileRawData data) {
 		this.data = data;
-	}
-
-	public Person getOwner() {
-		return owner;
-	}
-
-	public void setOwner(Person owner) {
-		this.owner = owner;
 	}
 
 	public String getModel() {

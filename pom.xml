@@ -12,7 +12,7 @@
 		<version.slf4j>1.6.1</version.slf4j>
 		<version.log4j>1.2.17</version.log4j>
 		<project.build.sourceEncoding>UTF-8</project.build.sourceEncoding>
-		<version.eclipselink>2.5.0</version.eclipselink>
+		<version.org.hibernate>4.2.2.Final</version.org.hibernate>
 		<version.spring>3.2.3.RELEASE</version.spring>
 		<version.testng>6.7</version.testng>
 		<version.tomcat-dbcp>7.0.21</version.tomcat-dbcp>
@@ -23,6 +23,11 @@
 
 	<dependencyManagement>
 		<dependencies>
+			<dependency>
+				<groupId>org.hibernate</groupId>
+				<artifactId>hibernate-entitymanager</artifactId>
+				<version>${version.org.hibernate}</version>
+			</dependency>
 			<dependency>
 				<groupId>commons-io</groupId>
 				<artifactId>commons-io</artifactId>
@@ -131,8 +136,8 @@
 			<artifactId>slf4j-log4j12</artifactId>
 		</dependency>
 		<dependency>
-			<groupId>org.eclipse.persistence</groupId>
-			<artifactId>org.eclipse.persistence.jpa</artifactId>
+			<groupId>org.hibernate</groupId>
+			<artifactId>hibernate-entitymanager</artifactId>
 		</dependency>
 		<dependency>
 			<groupId>commons-io</groupId>

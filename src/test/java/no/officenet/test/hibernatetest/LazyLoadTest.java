@@ -11,6 +11,8 @@ import no.officenet.test.hibernatetest.service.EntityRepository;
 import no.officenet.test.hibernatetest.service.PersonRepository;
 import org.apache.commons.io.FileUtils;
 import org.apache.commons.io.IOUtils;
+import org.hibernate.LobHelper;
+import org.hibernate.Session;
 import org.springframework.aop.framework.Advised;
 import org.springframework.aop.support.AopUtils;
 import org.springframework.dao.DataAccessException;
@@ -38,6 +40,8 @@ import javax.persistence.PersistenceContext;
 import javax.persistence.PersistenceUnitUtil;
 import javax.sql.DataSource;
 import java.io.File;
+import java.io.FileInputStream;
+import java.io.FileNotFoundException;
 import java.io.IOException;
 import java.io.OutputStream;
 import java.sql.Blob;
@@ -74,95 +78,67 @@ public class LazyLoadTest extends AbstractTestNGSpringContextTests {
 
 	protected TransactionTemplate transactionTemplate;
 
-	private static final String companyName = "OfficeNet AS";
-	private static final String personUserName = "andreak";
-
 	@BeforeClass
 	private void beforeClass() throws Exception {
 		transactionTemplate = new TransactionTemplate(transactionManager, new DefaultTransactionDefinition(TransactionDefinition.PROPAGATION_REQUIRED));
 		persistenceUnitUtil = entityManagerFactory.getPersistenceUnitUtil();
 	}
 
-	@BeforeMethod
-	private void beforeEachMethod() throws Exception {
-		generateTestData();
-	}
-
-	@AfterMethod
-	private void afterEachMethod() throws Exception {
-		deleteTestData();
-	}
-
-	@SuppressWarnings({"unchecked"})
-	protected <T> T getTargetObject(Object proxy, Class<T> targetClass) throws Exception {
-		if (AopUtils.isJdkDynamicProxy(proxy)) {
-			return (T) ((Advised)proxy).getTargetSource().getTarget();
-		} else {
-			return (T) proxy; // expected to be cglib proxy then, which is simply a specialized class
-		}
-	}
-
-	public void testLazyLoadLeaksConnections() throws Exception {
-/*		ComboPooledDataSource c3poDataSource = (ComboPooledDataSource) dataSource;
-		System.out.println("Looping to trigger connection-leak");
-		for (int i = 0; i < 10; i++) {
-			System.out.println("Iteration " + (i + 1));
-			Company officeNet = transactionTemplate.execute(new TransactionCallback<Company>() {
-				@Override
-				public Company doInTransaction(TransactionStatus status) {
-					return companyRepository.findByCompanyName(companyName);
-				}
-			});
-			for (Person person : officeNet.getEmployees()) {
-				for (Car car : person.getCars()) {
-					System.out.println("Used connections in pool: " + c3poDataSource.getNumBusyConnections());
-					System.out.println("Employee " + person.getFirstName() + " has car: " + car.getModel());
-				}
-			}
-		}*/
-		// never gets here cause the loop triggers the connection-leak
-	}
-
-	public void retreiveEntity() throws Exception {
-		AbstractEntity abstractEntity = entityRepository.retrieve(1L);
-		System.out.println(abstractEntity);
-	}
-
-	public void testLazyLoadManyToOne() throws Exception {
-		final Person person = personRepository.findByUserName(personUserName);
-		Company company = person.getCompany();
-		System.out.println("Got " + person.getFirstName() + "'s company: " + company.getName());
-	}
-
-	public void testLazyLoadManyToOneWithNaturalKeyFails() throws Exception {
-		Long carId = transactionTemplate.execute(new TransactionCallback<Long>() {
-			@Override
-			public Long doInTransaction(TransactionStatus status) {
-				Person p = personRepository.findByUserName(personUserName);
-				Car car = p.getCars().get(0);
-				return car.getId();
-			}
-		});
-		System.out.println("Retrieving car with id = " + carId);
-		Car car = carRepository.retrieve(carId);
-		Assert.assertTrue(persistenceUnitUtil.isLoaded(car.getOwner()), "car.getOwner is lazy but should be initialized because it's not mapped by PK");
-	}
-
-	public void testPolymorphicAssoc() throws Exception {
-		Company on = companyRepository.findByCompanyName(companyName);
-		System.out.println("Got company");
-		System.out.println(on.getRole());
-		Assert.assertTrue(on.getRole() instanceof Person);
-		Person role = (Person) on.getRole();
-		System.out.println("role: " + role.getFirstName() + " " + role.getLastName());
-	}
-
-	public void testLazyBlob() throws Exception {
+	public void testCreateBlobFails() throws Exception {
 		transactionTemplate.execute(new TransactionCallbackWithoutResult() {
 			@Override
 			protected void doInTransactionWithoutResult(TransactionStatus status) {
 				try {
-					final Car car = carRepository.retrieve(58l);
+					File fph = new File("/home/andreak/a.txt");
+					Session session = entityManager.unwrap(Session.class);
+					LobHelper lobHelper = session.getLobHelper();
+					Blob b = lobHelper.createBlob(new FileInputStream(fph), fph.length());
+					Car car = new Car("Vamonda!");
+					car.setData(new FileRawData(b));
+					carRepository.save(car);
+				} catch (Exception e) {
+					throw new RuntimeException(e.getMessage(), e);
+				}
+			}
+		});
+	}
+
+	public void testCreateBlobSuccess() throws Exception {
+		transactionTemplate.execute(new TransactionCallbackWithoutResult() {
+			@Override
+			protected void doInTransactionWithoutResult(TransactionStatus status) {
+				try {
+					Blob b = new JdbcTemplate(dataSource).execute(new ConnectionCallback<Blob>() {
+						@Override
+						public Blob doInConnection(Connection con) throws SQLException, DataAccessException {
+							Blob broll = con.createBlob();
+							OutputStream outputStream = broll.setBinaryStream(1);
+							try {
+								FileUtils.copyFile(new File("/home/andreak/a.txt"), outputStream);
+								outputStream.flush();
+								outputStream.close();
+							} catch (Exception e) {
+								e.printStackTrace();  //To change body of catch statement use File | Settings | File Templates.
+							}
+							return broll;
+						}
+					});
+					Car car = new Car("Wroooooooooooooooom!");
+					car.setData(new FileRawData(b));
+					carRepository.save(car);
+				} catch (Exception e) {
+					throw new RuntimeException(e.getMessage(), e);
+				}
+			}
+		});
+	}
+
+	public void testReadBlob() throws Exception {
+		transactionTemplate.execute(new TransactionCallbackWithoutResult() {
+			@Override
+			protected void doInTransactionWithoutResult(TransactionStatus status) {
+				try {
+					final Car car = carRepository.retrieve(51l);
 					FileUtils.copyInputStreamToFile(car.getData().getData().getBinaryStream(), new File("/home/andreak/hei-" + System.currentTimeMillis() + ".dmp"));
 				} catch (Exception e) {
 					throw new RuntimeException(e.getMessage(), e);
@@ -171,60 +147,5 @@ public class LazyLoadTest extends AbstractTestNGSpringContextTests {
 		});
 	}
 
-	private void deleteTestData() {
-		transactionTemplate.execute(new TransactionCallbackWithoutResult() {
-			@Override
-			protected void doInTransactionWithoutResult(TransactionStatus status) {
-				Company companyToDelete = companyRepository.findByCompanyName(companyName);
-				if (companyToDelete != null) {
-					companyRepository.remove(companyToDelete);
-				}
-			}
-		});
-	}
-
-	private void generateTestData() {
-		final Company officeNet = new Company(companyName)
-			.addEmployee(
-				new Person(personUserName, "Andreas", "Krogh", Arrays.asList(
-					new Car("Volvo")
-				))
-			).addEmployee(
-				new Person("foo", "Foo", "Bar", Arrays.asList(
-					new Car("Ferrari")
-				))
-			);
-		final Person superRole = new Person("superRole", "Super", "Role", Collections.<Car>emptyList());
-		transactionTemplate.execute(new TransactionCallbackWithoutResult() {
-			@Override
-			protected void doInTransactionWithoutResult(TransactionStatus status) {
-				Company savedON = companyRepository.save(officeNet);
-				superRole.setCompany(savedON);
-				savedON.setRole(personRepository.save(superRole));
-				companyRepository.save(savedON);
-/*
-				Blob b = new JdbcTemplate(dataSource).execute(new ConnectionCallback<Blob>() {
-					@Override
-					public Blob doInConnection(Connection con) throws SQLException, DataAccessException {
-						Blob b = con.createBlob();
-						OutputStream outputStream = b.setBinaryStream(1);
-						try {
-//							FileUtils.copyFile(new File("/home/andreak/a.txt"), outputStream);
-							FileUtils.copyFile(new File("/home/andreak/Downloads/quantal-desktop-amd64.iso"), outputStream);
-							outputStream.flush();
-							outputStream.close();
-						} catch (IOException e) {
-							e.printStackTrace();  //To change body of catch statement use File | Settings | File Templates.
-						}
-						return b;
-					}
-				});
-				Car car = new Car("Vamonda!");
-				car.setData(new FileRawData(b));
-				carRepository.save(car);
-*/
-			}
-		});
-	}
 
 }
