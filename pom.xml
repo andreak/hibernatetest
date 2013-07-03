@@ -100,13 +100,11 @@
 				<version>${version.derby}</version>
 			</dependency>
 -->
-<!--
 			<dependency>
 				<groupId>org.postgresql</groupId>
 				<artifactId>postgresql</artifactId>
 				<version>${version.postgresql}</version>
 			</dependency>
--->
 			<dependency>
 				<groupId>com.impossibl</groupId>
 				<artifactId>pgjdbc-ng</artifactId>

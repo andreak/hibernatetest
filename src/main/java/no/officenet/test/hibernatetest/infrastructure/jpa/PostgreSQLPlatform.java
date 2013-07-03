@@ -8,7 +8,6 @@ import java.sql.Types;
 
 public class PostgreSQLPlatform extends org.eclipse.persistence.platform.database.PostgreSQLPlatform {
 
-/*
 	@Override
 	public Object getObjectFromResultSet(ResultSet resultSet, int columnNumber, int type, AbstractSession session) throws SQLException {
 		if ((type == Types.BIGINT || type == Types.INTEGER) && resultSet.getMetaData().getColumnTypeName(columnNumber).equals("oid")) {
@@ -17,5 +16,4 @@ public class PostgreSQLPlatform extends org.eclipse.persistence.platform.databas
 			return super.getObjectFromResultSet(resultSet, columnNumber, type, session);
 		}
 	}
-*/
 }
