@@ -96,6 +96,8 @@ public class BlobTest extends AbstractTestNGSpringContextTests {
 					}
 				});
 				Car car = new Car(new DateTime(), "Vamonda!");
+				car.setColor(CustomOption.some("black"));
+				car.setMilage(CustomOption.some(123l));
 				car.setData(new FileRawData(b));
 				carRepository.save(car);
 			}

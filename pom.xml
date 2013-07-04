@@ -166,6 +166,11 @@
 			<artifactId>tomcat-dbcp</artifactId>
 		</dependency>
 
+		<dependency>
+			<groupId>org.functionaljava</groupId>
+			<artifactId>functionaljava</artifactId>
+			<version>3.1</version>
+		</dependency>
 
 		<!-- test deps -->
 		<dependency>

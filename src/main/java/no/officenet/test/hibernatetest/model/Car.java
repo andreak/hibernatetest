@@ -1,5 +1,7 @@
 package no.officenet.test.hibernatetest.model;
 
+import no.officenet.test.hibernatetest.CustomOption;
+import no.officenet.test.hibernatetest.CustomOption;
 import no.officenet.test.hibernatetest.infrastructure.jpa.JodaDateTimeConverter;
 import org.joda.time.DateTime;
 
@@ -42,6 +44,28 @@ public class Car extends AbstractEntity {
 	@OneToOne(cascade = CascadeType.ALL, fetch = FetchType.LAZY, orphanRemoval = true)
 	@JoinColumn(name = "data_id")
 	private FileRawData data;
+
+	@Column(name = "color")
+	CustomOption<String> color = CustomOption.none();
+
+	@Column(name = "milage")
+	CustomOption<Long> milage = CustomOption.none();
+
+	public CustomOption<String> getColor() {
+		return color;
+	}
+
+	public void setColor(CustomOption<String> color) {
+		this.color = color;
+	}
+
+	public CustomOption<Long> getMilage() {
+		return milage;
+	}
+
+	public void setMilage(CustomOption<Long> milage) {
+		this.milage = milage;
+	}
 
 	public FileRawData getData() {
 		return data;
