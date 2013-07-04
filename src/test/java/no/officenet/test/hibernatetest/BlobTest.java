@@ -9,6 +9,7 @@ import no.officenet.test.hibernatetest.service.EntityRepository;
 import no.officenet.test.hibernatetest.service.PersonRepository;
 import org.apache.commons.io.FileUtils;
 import org.apache.commons.io.IOUtils;
+import org.joda.time.DateTime;
 import org.springframework.dao.DataAccessException;
 import org.springframework.jdbc.core.ConnectionCallback;
 import org.springframework.jdbc.core.JdbcTemplate;
@@ -94,7 +95,7 @@ public class BlobTest extends AbstractTestNGSpringContextTests {
 						return b;
 					}
 				});
-				Car car = new Car("Vamonda!");
+				Car car = new Car(new DateTime(), "Vamonda!");
 				car.setData(new FileRawData(b));
 				carRepository.save(car);
 			}
@@ -124,7 +125,7 @@ public class BlobTest extends AbstractTestNGSpringContextTests {
 						return b;
 					}
 				});
-				Car car = new Car("Vamonda!");
+				Car car = new Car(new DateTime(), "Vamonda!");
 				car.setData(new FileRawData(b));
 				carRepository.save(car);
 			}

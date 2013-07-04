@@ -19,10 +19,16 @@
 		<version.derby>10.9.1.0</version.derby>
 		<version.postgresql>9.2-1002-jdbc4</version.postgresql>
 		<version.commons-io>2.4</version.commons-io>
+		<version.jodatime>2.1</version.jodatime>
 	</properties>
 
 	<dependencyManagement>
 		<dependencies>
+			<dependency>
+				<groupId>joda-time</groupId>
+				<artifactId>joda-time</artifactId>
+				<version>${version.jodatime}</version>
+			</dependency>
 			<dependency>
 				<groupId>commons-io</groupId>
 				<artifactId>commons-io</artifactId>
@@ -93,13 +99,11 @@
 				<artifactId>testng</artifactId>
 				<version>${version.testng}</version>
 			</dependency>
-<!--
 			<dependency>
 				<groupId>org.apache.derby</groupId>
 				<artifactId>derby</artifactId>
 				<version>${version.derby}</version>
 			</dependency>
--->
 			<dependency>
 				<groupId>org.postgresql</groupId>
 				<artifactId>postgresql</artifactId>
@@ -127,6 +131,10 @@
 		<dependency>
 			<groupId>org.slf4j</groupId>
 			<artifactId>slf4j-log4j12</artifactId>
+		</dependency>
+		<dependency>
+			<groupId>joda-time</groupId>
+			<artifactId>joda-time</artifactId>
 		</dependency>
 		<dependency>
 			<groupId>org.eclipse.persistence</groupId>
@@ -170,18 +178,18 @@
 			<artifactId>spring-test</artifactId>
 			<scope>test</scope>
 		</dependency>
-<!--
 		<dependency>
 			<groupId>org.apache.derby</groupId>
 			<artifactId>derby</artifactId>
 			<scope>test</scope>
 		</dependency>
--->
+<!--
 		<dependency>
 			<groupId>com.impossibl</groupId>
 			<artifactId>pgjdbc-ng</artifactId>
 			<scope>test</scope>
 		</dependency>
+-->
 
 	</dependencies>
 

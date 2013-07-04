@@ -11,6 +11,7 @@ import no.officenet.test.hibernatetest.service.EntityRepository;
 import no.officenet.test.hibernatetest.service.PersonRepository;
 import org.apache.commons.io.FileUtils;
 import org.apache.commons.io.IOUtils;
+import org.joda.time.DateTime;
 import org.springframework.aop.framework.Advised;
 import org.springframework.aop.support.AopUtils;
 import org.springframework.dao.DataAccessException;
@@ -187,11 +188,11 @@ public class LazyLoadTest extends AbstractTestNGSpringContextTests {
 		final Company officeNet = new Company(companyName)
 			.addEmployee(
 				new Person(personUserName, "Andreas", "Krogh", Arrays.asList(
-					new Car("Volvo")
+					new Car(new DateTime(), "Volvo")
 				))
 			).addEmployee(
 				new Person("foo", "Foo", "Bar", Arrays.asList(
-					new Car("Ferrari")
+					new Car(new DateTime(), "Ferrari")
 				))
 			);
 		final Person superRole = new Person("superRole", "Super", "Role", Collections.<Car>emptyList());
