@@ -39,7 +39,6 @@
 		<property name="jpaProperties">
 			<props>
 				<prop key="eclipselink.cache.shared.default">false</prop>
-				<prop key="eclipselink.target-database">no.officenet.test.hibernatetest.infrastructure.jpa.PostgreSQLPlatform</prop>
 				<prop key="javax.persistence.sharedCache.mode">ENABLE_SELECTIVE</prop>
 			</props>
 		</property>

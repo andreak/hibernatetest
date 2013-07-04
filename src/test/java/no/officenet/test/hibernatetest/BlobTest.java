@@ -8,6 +8,7 @@ import no.officenet.test.hibernatetest.service.CompanyRepository;
 import no.officenet.test.hibernatetest.service.EntityRepository;
 import no.officenet.test.hibernatetest.service.PersonRepository;
 import org.apache.commons.io.FileUtils;
+import org.apache.commons.io.IOUtils;
 import org.springframework.dao.DataAccessException;
 import org.springframework.jdbc.core.ConnectionCallback;
 import org.springframework.jdbc.core.JdbcTemplate;
@@ -39,7 +40,7 @@ import java.sql.SQLException;
  * Must be run with VM-args= -javaagent:/home/andreak/.m2/repository/org/springframework/spring-instrument/3.2.3.RELEASE/spring-instrument-3.2.3.RELEASE.jar
  * because EclipseLink must have this
  */
-@Test
+@Test(singleThreaded = true)
 @ContextConfiguration(locations = {
 	"classpath*:spring/*-context.xml"
 })
@@ -84,8 +85,7 @@ public class BlobTest extends AbstractTestNGSpringContextTests {
 						Blob b = con.createBlob();
 						OutputStream outputStream = b.setBinaryStream(1);
 						try {
-							FileUtils.copyFile(new File("/home/andreak/a.txt"), outputStream);
-//							FileUtils.copyFile(new File("/home/andreak/Downloads/quantal-desktop-amd64.iso"), outputStream);
+							IOUtils.copy(IOUtils.toInputStream("Hi man\nGo!"), outputStream);
 							outputStream.flush();
 							outputStream.close();
 						} catch (IOException e) {
@@ -105,7 +105,7 @@ public class BlobTest extends AbstractTestNGSpringContextTests {
 	 * Only difference between testCreateBlobFails is that this method doesn't save using companyRepository first
 	 * @throws Exception
 	 */
-	public void testCreateBlobFails() throws Exception {
+	public void testCreateBlobSuccess2() throws Exception {
 		transactionTemplate.execute(new TransactionCallbackWithoutResult() {
 			@Override
 			protected void doInTransactionWithoutResult(TransactionStatus status) {
@@ -115,8 +115,7 @@ public class BlobTest extends AbstractTestNGSpringContextTests {
 						Blob b = con.createBlob();
 						OutputStream outputStream = b.setBinaryStream(1);
 						try {
-							FileUtils.copyFile(new File("/home/andreak/a.txt"), outputStream);
-//							FileUtils.copyFile(new File("/home/andreak/Downloads/quantal-desktop-amd64.iso"), outputStream);
+							IOUtils.copy(IOUtils.toInputStream("Hi man\nGo!"), outputStream);
 							outputStream.flush();
 							outputStream.close();
 						} catch (IOException e) {
@@ -132,13 +131,13 @@ public class BlobTest extends AbstractTestNGSpringContextTests {
 		});
 	}
 
-	public void testReadBlobHangsForever() throws Exception {
+	public void testReadBlob() throws Exception {
 		transactionTemplate.execute(new TransactionCallbackWithoutResult() {
 			@Override
 			protected void doInTransactionWithoutResult(TransactionStatus status) {
 				try {
 					final Car car = carRepository.retrieve(177l);
-					FileUtils.copyInputStreamToFile(car.getData().getData().getBinaryStream(), new File("/home/andreak/hei-" + System.currentTimeMillis() + ".dmp"));
+					FileUtils.copyInputStreamToFile(car.getData().getData().getBinaryStream(), new File(System.getProperty("user.home") + "/hei-" + System.currentTimeMillis() + ".dmp"));
 				} catch (Exception e) {
 					throw new RuntimeException(e.getMessage(), e);
 				}
