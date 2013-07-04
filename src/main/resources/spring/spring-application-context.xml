@@ -34,6 +34,7 @@
 		  class="org.springframework.orm.jpa.LocalContainerEntityManagerFactoryBean">
 		<property name="dataSource" ref="myDataSource"/>
 		<property name="packagesToScan" value="no.officenet.test"/>
+		<property name="persistenceUnitPostProcessors" ref="puPosProcessor"/>
 		<property name="jpaVendorAdapter" ref="jpaVendorAdapter"/>
 		<property name="jpaDialect" ref="jpaDialect"/>
 		<property name="jpaProperties">
@@ -42,6 +43,10 @@
 				<prop key="javax.persistence.sharedCache.mode">ENABLE_SELECTIVE</prop>
 			</props>
 		</property>
+	</bean>
+
+	<bean id="puPosProcessor" class="no.officenet.test.hibernatetest.infrastructure.jpa.ClasspathScanningPersistenceUnitPostProcessor">
+		<constructor-arg value="no.officenet.test"/>
 	</bean>
 
 	<bean id="jpaDialect" class="org.springframework.orm.jpa.vendor.EclipseLinkJpaDialect"/>

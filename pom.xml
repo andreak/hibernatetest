@@ -183,13 +183,11 @@
 			<artifactId>derby</artifactId>
 			<scope>test</scope>
 		</dependency>
-<!--
-		<dependency>
-			<groupId>com.impossibl</groupId>
-			<artifactId>pgjdbc-ng</artifactId>
-			<scope>test</scope>
-		</dependency>
--->
+		<!--<dependency>-->
+			<!--<groupId>com.impossibl</groupId>-->
+			<!--<artifactId>pgjdbc-ng</artifactId>-->
+			<!--<scope>test</scope>-->
+		<!--</dependency>-->
 
 	</dependencies>
 
