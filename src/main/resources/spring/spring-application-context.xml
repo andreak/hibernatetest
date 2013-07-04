@@ -18,8 +18,6 @@
 		<property name="url" value="${infrastructure.datasource.url}" />
 		<property name="username" value="${infrastructure.datasource.username}" />
 		<property name="password" value="${infrastructure.datasource.password}" />
-
-		<!-- these are C3P0 properties -->
 		<property name="minIdle" value="${infrastructure.datasource.minPoolSize}" />
 		<property name="maxActive" value="${infrastructure.datasource.maxPoolSize}" />
 		<property name="maxWait" value="${infrastructure.datasource.maxIdle}" />
